@@ -1,4 +1,9 @@
 package com.company.app.dto;
 
-public class LoginRequest {
+import lombok.Data;
+
+@Data
+public class LoginRequestDto {
+    private String username;
+    private String password;
 }

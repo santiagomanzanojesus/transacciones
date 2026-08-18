@@ -1,4 +1,4 @@
-package com.company.demo.dto;
+package com.company.app.dto;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

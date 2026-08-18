@@ -5,18 +5,20 @@ import com.company.app.repository.UsuarioRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class AuthService {
+public class LoginService {
 
-    private UsuarioRepository usuarioRepository;
-    private BCryptPasswordEncoder passwordEncoder;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public boolean authenticate(String username, String password) {
+
         Optional<Usuario> userOpt = usuarioRepository.findByUsername(username);
         if (userOpt.isPresent()) {
             return passwordEncoder.matches(password, userOpt.get().getPassword());
@@ -27,11 +29,11 @@ public class AuthService {
     // Método para insertar usuario inicial (ejecutar al iniciar la app)
     @PostConstruct
     public void init() {
-        if (!usuarioRepository.findByUsername("admin").isPresent()) {
+      //  if (usuarioRepository.findByUsername("admin").isEmpty()) {
             Usuario admin = new Usuario();
             admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setPassword(passwordEncoder.encode("admin"));
             usuarioRepository.save(admin);
-        }
+        //}
     }
 }

@@ -1,15 +1,15 @@
-package com.company.demo.controller;
-import com.company.demo.dto.TransaccionDto;
-import com.company.demo.service.TransaccionService;
+package com.company.app.controller;
+import com.company.app.dto.TransaccionDto;
+import com.company.app.service.TransaccionService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+@CrossOrigin("*")
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/transaccion")
+@RequestMapping("/api/transacciones")
 public class ApplicationController {
 
     private final TransaccionService service;

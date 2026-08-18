@@ -1,6 +1,5 @@
-package com.company.demo.dto;
+package com.company.app.dto;
 
-import com.company.demo.enums.Estatus;
 import lombok.*;
 
 import java.math.BigDecimal;
