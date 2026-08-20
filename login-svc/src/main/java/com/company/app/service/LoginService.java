@@ -19,7 +19,7 @@ public class LoginService {
 
     public boolean authenticate(String username, String password) {
 
-        Optional<Usuario> userOpt = usuarioRepository.findByUsername(username);
+        Optional<Usuario> userOpt = usuarioRepository.findByUsername(username).stream().findFirst();
         if (userOpt.isPresent()) {
             return passwordEncoder.matches(password, userOpt.get().getPassword());
         }
@@ -29,11 +29,14 @@ public class LoginService {
     // Método para insertar usuario inicial (ejecutar al iniciar la app)
     @PostConstruct
     public void init() {
-      //  if (usuarioRepository.findByUsername("admin").isEmpty()) {
-            Usuario admin = new Usuario();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin"));
-            usuarioRepository.save(admin);
+        Optional<Usuario> id = usuarioRepository.findByUsername("admin");
+        if(id.isPresent()) {
+            usuarioRepository.deleteById(id.get().getId());
+        }
+        Usuario admin = new Usuario();
+        admin.setUsername("admin");
+        admin.setPassword(passwordEncoder.encode("admin"));
+        usuarioRepository.save(admin);
         //}
     }
 }

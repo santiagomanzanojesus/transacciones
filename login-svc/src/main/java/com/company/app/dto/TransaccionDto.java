@@ -19,7 +19,7 @@ public class TransaccionDto {
     private String importe;
 
     @NotBlank(message = "Cliente es obligatorio")
-    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Cliente solo debe contener letras y espacios")
+    //@Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Cliente solo debe contener letras y espacios")
     private String cliente;
 
     @NotBlank(message = "Favor de proveer un secreto")

@@ -1,10 +1,13 @@
 package com.company.app.service;
 
 import com.company.app.config.PersistenceClient;
+import com.company.app.dto.PagedResponse;
 import com.company.app.dto.TransaccionDto;
 import com.company.app.dto.TransaccionResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,4 +37,13 @@ public class TransaccionService {
             throw new RuntimeException("Error al descifrar o procesar", e);
         }
     }
+
+  /*  public Page<TransaccionResponse> obtenerTransacciones(int page, int limit, String search, String sortBy, String sortDir) {
+        return persistenceClient.obtenerTransacciones(page, limit, search, sortBy, sortDir);
+    }
+*/
+  public PagedResponse<TransaccionResponse> obtenerTransacciones(
+          int page, int limit, String search, String sortBy, String sortDir) {
+      return persistenceClient.obtenerTransacciones(page, limit, search, sortBy, sortDir);
+  }
 }

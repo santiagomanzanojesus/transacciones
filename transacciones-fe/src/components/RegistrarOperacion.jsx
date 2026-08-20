@@ -1,152 +1,113 @@
-import { useState } from "react";
-import api from "../api/api";
+import React, { useState } from "react";
+import { crearTransaccion } from "../api/api";
 import { encryptAES } from "../utils/crypto";
-import Notificacion from "./Notification";
 
-function RegistrarOperacion() {
-  const [form, setForm] = useState({
-    operacion: "",
-    importe: "",
-    cliente: "",
-    secreto: "",
-  });
-  const [responseData, setResponseData] = useState(null);
-  const [errors, setErrors] = useState({});
+const RegistrarOperacion = ({ onRegistroExitoso }) => {
+  const [operacion, setOperacion] = useState("");
+  const [importe, setImporte] = useState("");
+  const [cliente, setCliente] = useState("");
+  const [secreto, setSecreto] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    // Limpiar errores del campo al cambiar
-    setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
+  const [mensaje, setMensaje] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setResponseData(null);
-    setErrors({});
-
-    // Cifrar el secreto antes de enviar
-    const payload = {
-      ...form,
-      secreto: encryptAES(form.secreto),
-    };
-
+    setMensaje("");
     try {
-      const response = await api.post("/api/transacciones", payload);
-      setResponseData(response.data);
-      // Limpiar formulario (opcional)
-      setForm({ operacion: "", importe: "", cliente: "", secreto: "" });
-    } catch (err) {
-      if (err.response && err.response.status === 400) {
-        // Errores de validación del backend
-        setErrors(err.response.data);
-      } else {
-        alert("Error al procesar la transacción. Intente de nuevo.");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        // onLogout();
+        // return;
       }
-      console.error(err);
+      const secretoCifrado = encryptAES(secreto);
+      const payload = { operacion, importe, cliente, secreto: secretoCifrado };
+      const response = await crearTransaccion(payload);
+      setOperacion("");
+      setImporte("");
+      setCliente("");
+      setSecreto("");
+      setMensaje(
+        `Operación registrada: ID ${response.data.id}, Estatus ${response.data.estatus}, Referencia ${response.data.referencia}`,
+      );
+      if (onRegistroExitoso) onRegistroExitoso(); // para refrescar lista
+      // Resetear campos?
+    } catch (err) {
+      setMensaje(
+        "Error al registrar: " + (err.response?.data?.message || err.message),
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-        Registrar Operación
-      </h2>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Operación */}
-          <div>
-            <label className="block text-gray-700 text-sm font-medium mb-1">
-              Operación
-            </label>
-            <input
-              type="text"
-              name="operacion"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.operacion ? "border-red-500" : "border-gray-300"}`}
-              placeholder="Ej: venta"
-              value={form.operacion}
-              onChange={handleChange}
-              required
-            />
-            {errors.operacion && (
-              <p className="text-red-500 text-xs mt-1">{errors.operacion}</p>
-            )}
-          </div>
-
-          {/* Importe */}
-          <div>
-            <label className="block text-gray-700 text-sm font-medium mb-1">
-              Importe
-            </label>
-            <input
-              type="text"
-              name="importe"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.importe ? "border-red-500" : "border-gray-300"}`}
-              placeholder="Ej: 100.00"
-              value={form.importe}
-              onChange={handleChange}
-              required
-            />
-            {errors.importe && (
-              <p className="text-red-500 text-xs mt-1">{errors.importe}</p>
-            )}
-          </div>
-
-          {/* Cliente */}
-          <div>
-            <label className="block text-gray-700 text-sm font-medium mb-1">
-              Cliente
-            </label>
-            <input
-              type="text"
-              name="cliente"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.cliente ? "border-red-500" : "border-gray-300"}`}
-              placeholder="Ej: Angel"
-              value={form.cliente}
-              onChange={handleChange}
-              required
-            />
-            {errors.cliente && (
-              <p className="text-red-500 text-xs mt-1">{errors.cliente}</p>
-            )}
-          </div>
-
-          {/* Secreto */}
-          <div>
-            <label className="block text-gray-700 text-sm font-medium mb-1">
-              Secreto
-            </label>
-            <input
-              type="text"
-              name="secreto"
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.secreto ? "border-red-500" : "border-gray-300"}`}
-              placeholder="Palabra secreta"
-              value={form.secreto}
-              onChange={handleChange}
-              required
-            />
-            {errors.secreto && (
-              <p className="text-red-500 text-xs mt-1">{errors.secreto}</p>
-            )}
-          </div>
+    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+      <h3 className="text-xl font-semibold mb-4">Registrar Operación</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Operación
+          </label>
+          <input
+            type="text"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            value={operacion}
+            onChange={(e) => setOperacion(e.target.value)}
+            required
+          />
         </div>
-
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Importe
+          </label>
+          <input
+            type="text"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            value={importe}
+            onChange={(e) => setImporte(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Cliente
+          </label>
+          <input
+            type="text"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            value={cliente}
+            onChange={(e) => setCliente(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Secreto
+          </label>
+          <input
+            type="text"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            value={secreto}
+            onChange={(e) => setSecreto(e.target.value)}
+            required
+          />
+        </div>
         <button
           type="submit"
           disabled={loading}
-          className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50"
+          className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
         >
-          {loading ? "Enviando..." : "Registrar Transacción"}
+          {loading ? "Enviando..." : "Registrar Operación"}
         </button>
+        {mensaje && (
+          <div className="mt-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded">
+            {mensaje}
+          </div>
+        )}
       </form>
-
-      <Notificacion data={responseData} />
     </div>
   );
-}
+};
 
 export default RegistrarOperacion;

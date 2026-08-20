@@ -36,6 +36,10 @@ public class TransaccionService {
         return pokemonPage.map(this::convertToDTO);
     }
 
+    public Page<Transaccion> obtenerTransacciones(String search, Pageable pageable) {
+        return repository.buscarConFiltro(search, pageable);
+    }
+
     protected  TransaccionDto convertToDTO(Transaccion tx){
         return TransaccionDto.builder().id(tx.getId())
                 .estatus(String.valueOf(Estatus.valueOf(String.valueOf(tx.getEstatus()))))
